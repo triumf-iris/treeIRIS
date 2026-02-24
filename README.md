@@ -8,7 +8,7 @@ treeIris requires both ROOT (https://root.cern.ch), ROOTANA (https://bitbucket.o
 
 To install treeIris use
 
-	git clone https://github.com/iris-triumf/treeIris
+	git clone https://github.com/triumf-iris/treeIRIS
 
 change variable "ROOTANA" in the Makefile to the path of your ROOTANA installation, 
 as well as IRISDIR to the directory where iris-daqtools is installed, and
