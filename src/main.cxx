@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <string>
+#include <fstream>
 
 #include "TMidasEvent.h"
 //#include "TMidasFile.h"
@@ -27,6 +28,7 @@
 #include "HandleSTAT.h"
 #include "HandleScaler.h"
 #include "HandleV1740.h"
+#include "HandlePHYSICS.h"
 
 #include "IScaler.cxx"
 #include "IDet.cxx"
@@ -38,7 +40,7 @@ int  gEventNumber = 0;
 int  gFileNumber = 0;
 bool gIsPedestalsRun = false;
 int  gEventCutoff = 0;
-bool gUseTdc = false;
+bool gUseTdc = false; //change to true to use Tdc
 bool gUseRaw = false;
 bool gUseDccp = false;
 bool gRandomise = false; //Randomise ADC values within the channel when calibrating.
@@ -76,7 +78,14 @@ void startRun(int run,int time)
 	//gIsPedestalsRun = gOdb->odbReadBool("/experiment/edit on start/Pedestals run");
 	gOdb->RB("/experiment/edit on start/Pedestals run",&gIsPedestalsRun);
 	printf("Begin run: %d, pedestal run: %d\n", gRunNumber, gIsPedestalsRun);
-		
+
+
+	//std::ofstream SdsEnergyCheck(Form("/home/saurabh/Study/Study/Experiment/TreeIrisTest/SdEnergyCheck/SdsEnergyCheck_%d.txt",gRunNumber), std::ios::trunc);
+	//SdsEnergyCheck.close();
+
+	//std::ofstream SdrEnergyCheck(Form("/home/saurabh/Study/Study/Experiment/TreeIrisTest/SdEnergyCheck/SdrEnergyCheck_%d.txt",gRunNumber), std::ios::trunc);
+	//SdrEnergyCheck.close();
+
 	if(treeFile!=NULL)
 	{
 	  	treeFile->Write();

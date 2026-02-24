@@ -42,7 +42,7 @@ LDFLAGS	      = -O2
 all: $(BINARYDIR)/treeIris $(LIBDIR)/libTEvent.so
 
 $(BINARYDIR)/treeIris: $(ANAOBJECTS) $(OBJECTDIR)/treeIris.o $(ROOTANA)/lib/librootana.a $(IRISLIB)
-	$(CXX) -o $@ $(CXXFLAGS) $^ $(ROOTGLIBS) $(IRISLIB) -lm -lz -lutil -lnsl -lpthread -lrt 
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(ROOTGLIBS) $(IRISLIB) -lm -lz -lutil -lpthread -lrt 
 	#remove -lnsl and -lrt for MacOS
 
 $(LIBDIR)/libTEvent.so: $(OBJECTDIR)/IDet.o $(OBJECTDIR)/ITdc.o $(OBJECTDIR)/IScaler.o $(OBJECTDIR)/TEventDict.o

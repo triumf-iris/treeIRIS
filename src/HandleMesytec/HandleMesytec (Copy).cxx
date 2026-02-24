@@ -146,7 +146,7 @@ float ZdyPed[NZdyChannels]={0.};
 // Time dependent corrections
 float SiTCorrFactor = 1.;
 float ICTCorrFactor = 1.;
-uint32_t adcThresh = 50;
+uint32_t adcThresh = 80;
 
 int ydNo, yuNo;
 
@@ -319,14 +319,18 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	  				
 					// CsI
 	  				if (modid==1 && vpeak > adcThresh && vpeak<3840){
-						if (channel<16){
+	    				if (channel<16){
 	    					CsI1[channel] = (float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5);
 	    					CsI1ADC[channel] = (float)vpeak;
+								std::ofstream CsI1EventCheck(Form("/home/saurabh/Study/Study/Experiment/TreeIrisTest/CsI1EnergyCheck/CsI1EventCheck_%d.txt",gRunNumber), std::ios::app);
+								if (gEventNumber == 1302457) {
+    				           	CsI1EventCheck << gEventNumber << "\t" << channel << "\t" << CsI1[channel] << std::endl;
+    				        	CsI1EventCheck.close();}
 	    	    		}	    
 		  				else if (channel>=16){
 	    					CsI2[channel-16] = (float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5);
 	    					CsI2ADC[channel-16] = (float)vpeak;
-	    	    		}
+	    	    		}	    
 	  				}
 	
 					// Second downstream S3 detector, rings
@@ -395,11 +399,12 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	    				if (channel<16) ydNo = (modid-6)*2+1; //Yd number
 	    				if (channel>15) ydNo = (modid-6)*2+2;
 	  				}
-
+	  
+	 				
+	
 	  				break;
 			} // switch
 	  	} // for loop
-		
 	} // nitems != 0
 	
 	// After looping over banks, fill the root tree
@@ -881,7 +886,6 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 		
 		// CsI
 		det.TCsI1Energy.resize(det.TYdMul);
-		det.TCsI2Energy.resize(det.TYdMul);
 		det.TCsI1Channel.resize(det.TYdMul);
 		det.TCsI1Phi.resize(det.TYdMul);
 		for (Int_t i=0;i<NCsIChannels;i++){
@@ -900,17 +904,7 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 						if(((maxCh/2)-det.TYdNo.at(l))==0){
 							det.TCsI1Mul++;
 	      					int m = (det.TYdChannel.at(l)%16)/(16/NCsI1Group);
-							
-							double rawECsI2 = (CsI1[maxCh] - CsI2Ped[m][maxCh]) * CsI2Gain[m][maxCh];
-							double *c = coeffs[maxCh];
-							//double ECsI2 = c[0]*rawECsI2*rawECsI2*rawECsI2 + c[1]*rawECsI2*rawECsI2 + c[2]*rawECsI2 + c[3];
-							double ECsI2 = c[0]*rawECsI2 + c[1];
-							det.TCsI1Energy.at(l) = ECsI2;
-							
-							//double rawECsI1 = (CsI1[maxCh] - CsI1Ped[m][maxCh]) * CsI1Gain[m][maxCh];
-							//double ECsI1 = c[0]*rawECsI1*rawECsI1*rawECsI1 + c[1]*rawECsI1*rawECsI1 + c[2]*rawECsI1 + c[3];
-							//double ECsI1 = c[0]*rawECsI1+ c[1];
-							det.TCsI1Energy.at(l) = ECsI1;
+	      					det.TCsI1Energy.at(l) = (CsI1[maxCh]-CsI1Ped[m][maxCh])*CsI1Gain[m][maxCh];
 							det.TCsI1Channel.at(l)=maxCh;
               				//printf("%d  %d  %lf  %lf\n",maxCh+32,m,CsI1Ped[m][maxCh],CsI1Gain[m][maxCh]);
               				if(gUseRaw) det.TCsI1ADC.push_back(CsI1ADC[maxCh]);
@@ -923,11 +917,6 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 							phi = (phi<-180.)? phi+360. : phi;
 							det.TCsI1Phi.at(l)=phi;
 							det.TYdPhi.at(l)=phi;
-
-							//rawECsI1 = 0;
-							rawECsI2 = 0;
-							ECsI2 = 0;
-							ECsI1 =0;
 						}
 					}
 	    		}
@@ -947,7 +936,10 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 			else break;
     	}
 
-	/*// Re-sorting Yd if hits don't match with CsI
+		
+
+  
+		/*// Re-sorting Yd if hits don't match with CsI
 		if(det.TCsI1Channel.size()>0&&det.TYdNo.size()>1&&calMesy.boolCsI1==true) // only check if YY1 has more than one hit and CsI has a hit and has been calibrated
 		{
  			if (int(det.TCsI1Channel.at(0)/2)-det.TYdNo.at(0)!=0 && int(det.TCsI1Channel.at(0)/2)-det.TYdNo.at(1)==0)//checking if the CsI hit is behind the first or second hit in  YY1

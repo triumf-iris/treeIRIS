@@ -27,6 +27,10 @@ class IDet : public TObject {
 		std::vector<Double_t> TCsI2Energy;
 		std::vector<Double_t> TCsI1Phi;
 		std::vector<Double_t> TCsI1ADC;
+		
+		Double_t TYdCsI1ETot;
+		Double_t TYdCsI2ETot;
+		Double_t TYdCsI3ETot;
 
 		Int_t TSSBADC;
 		Double_t TSSBEnergy;

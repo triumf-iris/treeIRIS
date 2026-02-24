@@ -37,9 +37,9 @@ const int NCsI2Group = 16;
 const int NCsI1Group = 16;
 const int NICChannels = 32;
 const int NCsIChannels = 16;
-const int NSd1rChannels = 24;
+const int NSd1rChannels = 32;
 const int NSd1sChannels = 32;
-const int NSd2rChannels = 24;
+const int NSd2rChannels = 32;
 const int NSd2sChannels = 32;
 const int NSurChannels = 32;
 const int NSusChannels = 32;
@@ -146,7 +146,8 @@ float ZdyPed[NZdyChannels]={0.};
 // Time dependent corrections
 float SiTCorrFactor = 1.;
 float ICTCorrFactor = 1.;
-uint32_t adcThresh = 50;
+float SiTCorrFactor1 = 1.;
+uint32_t adcThresh = 0;
 
 int ydNo, yuNo;
 
@@ -311,26 +312,26 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	          				TrADC[2] = vpeak;
 	          				TrEnergy[2] = (float(vpeak)+gRandomise*fRandom.Uniform(-0.5,0.5)-TrPed[2]) * TrGain[2];
 						}
-						if (channel==31){
+						if (channel==30){
 	          				SSBADC = vpeak;
 	          				SSBEnergy = (float(vpeak)+gRandomise*fRandom.Uniform(-0.5,0.5)-SSBPed) *SSBGain;
 						}
 	  				}
 	  				
 					// CsI
-	  				if (modid==1 && vpeak > adcThresh && vpeak<3840){
-						if (channel<16){
+	  				if (modid==1){// && vpeak > adcThresh && vpeak<3840){
+	    				if (channel<16){
 	    					CsI1[channel] = (float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5);
 	    					CsI1ADC[channel] = (float)vpeak;
 	    	    		}	    
 		  				else if (channel>=16){
 	    					CsI2[channel-16] = (float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5);
 	    					CsI2ADC[channel-16] = (float)vpeak;
-	    	    		}
+	    	    		}	    
 	  				}
 	
 					// Second downstream S3 detector, rings
-	  				if (modid==2 && vpeak > adcThresh && vpeak<3840){
+	  				if (modid==2){// && vpeak > adcThresh && vpeak<3840){
 						Sd2rADC[channel]=vpeak;	
 						if(channel<16) ZdyADC[channel] = vpeak;
 	 					if (!usePeds){
@@ -344,25 +345,24 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	  				}
 	  
 					// Second downstream S3 detector, segments
-	  				if (modid==3 && vpeak > adcThresh && vpeak<3840){
-						if(channel>0 && channel<32){channel = 32-channel;}
+	  				if (modid==3){// && vpeak > adcThresh && vpeak<3840){
 						Sd2sADC[channel]=vpeak;		
-						//if(channel<8) ZdxADC[7-channel] = vpeak;
-						//if(channel>7 && channel<16) ZdxADC[channel] = vpeak;
+						if(channel<8) ZdxADC[7-channel] = vpeak;
+						if(channel>7 && channel<16) ZdxADC[channel] = vpeak;
 	    				if (!usePeds){	
 	    					Sd2s[channel] = Sd2sOffset[channel]+Sd2sGain[channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
-							//if(channel<8) Zdx[7-channel] = ZdxOffset[7-channel]+ZdxGain[7-channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
-							//if(channel>7 && channel<16) Zdx[channel] = ZdxOffset[channel]+ZdxGain[channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
+							if(channel<8) Zdx[7-channel] = ZdxOffset[7-channel]+ZdxGain[7-channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
+							if(channel>7 && channel<16) Zdx[channel] = ZdxOffset[channel]+ZdxGain[channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
 						}
 	 					else if (usePeds){
 	   						Sd2s[channel] = Sd2sGain[channel]*(((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5))-Sd2sPed[channel]);
-							//if(channel<8) Zdx[7-channel] = ZdxGain[7-channel]*(((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5))-ZdxPed[7-channel]);
-							//if(channel>7 && channel<16) Zdx[channel] = ZdxGain[channel]*(((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5))-ZdxPed[channel]);
+							if(channel<8) Zdx[7-channel] = ZdxGain[7-channel]*(((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5))-ZdxPed[7-channel]);
+							if(channel>7 && channel<16) Zdx[channel] = ZdxGain[channel]*(((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5))-ZdxPed[channel]);
 							}
 	   					}
 	
 					// First downstream S3 detector, rings
-	  				if (modid==4 && vpeak > adcThresh  && vpeak<3840){
+	  				if (modid==4){// && vpeak > adcThresh  && vpeak<3840){
 						Sd1rADC[channel]=vpeak;		
 						if (!usePeds){
 	    					Sd1r[channel] = Sd1rOffset[channel]+Sd1rGain[channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
@@ -372,7 +372,7 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 						}
 					}	
 					// First downstream S3 detector, segments
-	  				if (modid==5 && vpeak > adcThresh  && vpeak<3840){
+	  				if (modid==5){// && vpeak > adcThresh  && vpeak<3840){
 						Sd1sADC[channel]=vpeak;		
 	     				if (!usePeds){
 	    					Sd1s[channel] = Sd1sOffset[channel]+Sd1sGain[channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
@@ -382,9 +382,30 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 						}
 					}
 	
-					// Downstream YY1 detector 
-	  				//if (modid>5 && modid<10 && vpeak>adcThresh  && vpeak<3500){
-					if (modid>5 && modid<10 && vpeak>adcThresh  && vpeak<3840){ 
+					// Upstream S3 detector, rings
+	  				if (modid==10){//  && vpeak> adcThresh && vpeak<3840){
+	   					SurADC[channel]=vpeak;		
+						if (!usePeds){
+	    					Sur[channel] = SurOffset[channel]+SurGain[channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
+						}
+						else if (usePeds){
+	   						Sur[channel] = SurGain[channel]*(((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5))-SurPed[channel]);
+						}
+					}
+	  				    
+					// Upstream S3 detector, segments
+	  				if (modid==11){//  && vpeak > adcThresh && vpeak<3840){
+	  					SusADC[channel]=vpeak;		
+	     				if (!usePeds){
+	    					Sus[channel] = SusOffset[channel]+SusGain[channel]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
+						}
+						else if (usePeds){
+	   						Sus[channel] = SusGain[channel]*(((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5))-SusPed[channel]);
+						}
+					}
+	  
+	 				// Downstream YY1 detector 
+	  				if (modid>5 && modid<10){// && vpeak>adcThresh  && vpeak<3840){
 						YdADC[channel+(modid-6)*32]=vpeak;
 	 					if(!usePeds){
 							Yd[channel+(modid-6)*32]=YdOffset[channel+(modid-6)*32]+YdGain[channel+(modid-6)*32]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
@@ -395,11 +416,23 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	    				if (channel<16) ydNo = (modid-6)*2+1; //Yd number
 	    				if (channel>15) ydNo = (modid-6)*2+2;
 	  				}
-
+	  
+	 				// Upstream YY1 detector 
+	  				if (modid>11 && modid<16){// && vpeak >adcThresh  && vpeak<3840){  
+	  				  	YuADC[channel+(modid-12)*32]=vpeak;
+	 					if(!usePeds){
+							Yu[channel+(modid-12)*32]=YuOffset[channel+(modid-12)*32]+YuGain[channel+(modid-12)*32]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5));
+						}
+						else{
+							Yu[channel+(modid-12)*32]=YuGain[channel+(modid-12)*32]*((float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5)-YuPedestal[channel+(modid-12)*32]);
+						}
+	    				if (channel<16) yuNo = (modid-12)*2+1; //Yu number
+	    				if (channel>15) yuNo = (modid-12)*2+2;
+					}
+	
 	  				break;
 			} // switch
 	  	} // for loop
-		
 	} // nitems != 0
 	
 	// After looping over banks, fill the root tree
@@ -407,34 +440,217 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	
 	det.Clear(); //make sure root variables are empty
 
-	if(bank==5){ 
+	if(bank==5){ // check last bank
+/*
+	         if(gUseRaw){ // write raw ADC values to tree and sort by largest to smallest
+
+		   // Sd1r
+		   for(Int_t i=0;i<NSd1rChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NSd1rChannels;j++){
+		       if(Sd1rADC[j] > maxADC){
+			 maxADC = Sd1rADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TSd1rADC.push_back(Sd1rADC[maxADCch]);
+		       Sd1rADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // Sd1s
+		   for(Int_t i=0;i<NSd1sChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NSd1sChannels;j++){
+		       if(Sd1sADC[j] > maxADC){
+			 maxADC = Sd1sADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TSd1sADC.push_back(Sd1sADC[maxADCch]);
+		       Sd1sADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // Sd2r
+		   for(Int_t i=0;i<NSd2rChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NSd2rChannels;j++){
+		       if(Sd2rADC[j] > maxADC){
+			 maxADC = Sd2rADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TSd2rADC.push_back(Sd2rADC[maxADCch]);
+		       Sd2rADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // Sd2s
+		   for(Int_t i=0;i<NSd2sChannels;i++){	      
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NSd2sChannels;j++){
+		       if(Sd2sADC[j] > maxADC){
+			 maxADC = Sd2sADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TSd2sADC.push_back(Sd2sADC[maxADCch]);
+		       Sd2sADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // Sur
+		   for(Int_t i=0;i<NSurChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NSurChannels;j++){
+		       if(SurADC[j] > maxADC){
+			 maxADC = SurADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TSurADC.push_back(SurADC[maxADCch]);
+		       SurADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // Sus
+		   for(Int_t i=0;i<NSusChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NSusChannels;j++){
+		       if(SusADC[j] > maxADC){
+			 maxADC = SusADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TSusADC.push_back(SusADC[maxADCch]);
+		       SusADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // Yd
+		   for(Int_t i=0;i<NYdChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NYdChannels;j++){
+		       if(YdADC[j] > maxADC){
+			 maxADC = YdADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TYdADC.push_back(YdADC[maxADCch]);
+		       YdADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // Yu
+		   for(Int_t i=0;i<NYuChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NYuChannels;j++){
+		       if(YuADC[j] > maxADC){
+			 maxADC = YuADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TYuADC.push_back(YuADC[maxADCch]);
+		       YuADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // DSSD x
+		   for(Int_t i=0;i<NZdxChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NZdxChannels;j++){
+		       if(ZdxADC[j] > maxADC){
+			 maxADC = ZdxADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TZdxADC.push_back(ZdxADC[maxADCch]);
+		       ZdxADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // DSSD Y
+		   for(Int_t i=0;i<NZdyChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NZdyChannels;j++){
+		       if(ZdyADC[j] > maxADC){
+			 maxADC = ZdyADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TZdyADC.push_back(ZdyADC[maxADCch]);
+		       ZdyADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // CsI1
+		   for(Int_t i=0;i<NCsIChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NCsIChannels;j++){
+		       if(CsI1ADC[j] > maxADC){
+			 maxADC = CsI1ADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TCsI1ADC.push_back(CsI1ADC[maxADCch]);
+		       CsI1ADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // CsI2
+		   for(Int_t i=0;i<NCsIChannels;i++){
+		     maxADC = 0.;
+		     maxADCch = -1;
+		     for(Int_t j=0;j<NCsIChannels;j++){
+		       if(CsI2ADC[j] > maxADC){
+			 maxADC = CsI2ADC[j];
+			 maxADCch = j;
+		       }
+		     }
+		     if(maxADC>0.){
+		       det.TCsI2ADC.push_back(CsI2ADC[maxADCch]);
+		       CsI2ADC[maxADCch]=0.;
+		     }
+		     else break;
+		   }
+		   // IC
+		   for(Int_t  i=0; i<NICChannels;i++){
+		     det.TICADC.push_back(IC[i]);
+		   }
+		   // TRIFIC
+		   for(Int_t i=0; i<NTrChannels; i++){
+		     det.TTrADC.push_back(TrADC[i]);
+		   }
+		   det.TSSBADC = SSBADC;
+		   det.TScADC = ScADC;
+		 }// if(gUseRaw)
+*/
+
 
 		// 1st downstream S3, ring side
-		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
-			for (Int_t i=0;i<24;i++){
-				for (Int_t j=0;j<24;j++){
-					if (j-i==1){
-						if(Sd1r[i]>0 && Sd1r[j]>0){
-							if(Sd1r[i]>Sd1r[j]){
-								Sd1r[i]+=Sd1r[j];
-								Sd1r[j]=0;
-								det.TSd1rNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-							else if (Sd1r[i]<Sd1r[j]){
-								Sd1r[j]+=Sd1r[i];
-								Sd1r[i]=0;
-								det.TSd1rNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-						}
-					}
-				}
-			}
-
-		
  		for (Int_t i=0;i<NSd1rChannels;i++){
     		maxE = 0.;
     		maxCh = -1;
@@ -449,42 +665,38 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
  				det.TSd1rEnergy.push_back(Sd1r[maxCh]);
         if(gUseRaw) det.TSd1rADC.push_back(Sd1rADC[maxCh]);
 				det.TSd1rChannel.push_back(maxCh);
-				//det.TSd1rNeighbour.push_back(-1);
+				det.TSd1rNeighbour.push_back(-1);
 				rndm = fRandom.Rndm(); //random number between 0 and 0.99 for each event
 				theta = TMath::RadToDeg()*atan((geoM.SdInnerRadius*(24.-maxCh-rndm)+geoM.SdOuterRadius*(maxCh+rndm))/24./geoM.Sd1Distance);
-				det.TSd1Theta.push_back(theta); //AS theta angle for Sd (24 - number of rings
+				det.TSd1Theta.push_back(theta); //AS theta angle for Sd (24 - number of rings)
     		Sd1r[maxCh] = 0.;
         Sd1rADC[maxCh] = 0;
 			}
 			else break;
     	}
-		
-  			// 1st downstream S3, sector side
-			// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
-			for (Int_t i=0;i<32;i++){
-				for (Int_t j=0;j<32;j++){
-					if (j-i==1 || j-i==31 ){
-						if(Sd1s[i]>0 && Sd1s[j]>0){
-							if(Sd1s[i]>Sd1s[j]){
-								Sd1s[i]+=Sd1s[j];
-								Sd1s[j]=0;
-								det.TSd1sNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-							else if (Sd1s[i]<Sd1s[j]){
-								Sd1s[j]+=Sd1s[i];
-								Sd1s[i]=0;
-								det.TSd1sNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-						}
+				
+  /*
+		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
+		for (Int_t i=0; i<det.TSd1rMul; i++){
+			if(det.TSd1rMul>i+1){
+				for(Int_t j=i+1; j<det.TSd1rMul; j++){
+					if(TMath::Abs(det.TSd1rChannel.at(i)-det.TSd1rChannel.at(j))==1){
+						det.TSd1rEnergy.at(i)+=det.TSd1rEnergy.at(j);
+						det.TSd1rNeighbour.at(i)=det.TSd1rChannel.at(j);
+						det.TSd1rMul--;
+						det.TSd1rEnergy.erase(det.TSd1rEnergy.begin()+j);
+						det.TSd1rChannel.erase(det.TSd1rChannel.begin()+j);
+						det.TSd1rNeighbour.erase(det.TSd1rNeighbour.begin()+j);
+						det.TSd1Theta.erase(det.TSd1Theta.begin()+j);
+						break;
 					}
 				}
 			}
-	
-		for(Int_t i=0;i<NSd1sChannels;i++){
+			if(det.TSd1rMul>=i) break;
+		}
+	*/
+		// 1st downstream S3, sector side
+		for (Int_t i=0;i<NSd1sChannels;i++){
     		maxE = 0.;
     		maxCh = -1;
     		for (Int_t j=0;j<NSd1sChannels;j++){
@@ -499,7 +711,7 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
     	  det.TSd1sEnergy.push_back(Sd1s[maxCh]);
         if(gUseRaw) det.TSd1sADC.push_back(Sd1sADC[maxCh]);
 				det.TSd1sChannel.push_back(maxCh);
-				//det.TSd1sNeighbour.push_back(-1);
+				det.TSd1sNeighbour.push_back(-1);
 				phi = -180.+360.*maxCh/32.;
 				rndm = fRandom.Rndm(); //random number between 0 and 0.99 for each event
 				det.TSd1Phi.push_back(phi+11.25*rndm);
@@ -508,251 +720,216 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 			}
 			else break;
     	}
- 
-		
-		// 2nd downstream S3, ring side
+  /*
 		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
-		for (Int_t i=0;i<24;i++){
-				for (Int_t j=0;j<24;j++){
-					if (j-i==1){
-						if(Sd2r[i]>0 && Sd2r[j]>0){
-							if(Sd2r[i]>Sd2r[j]){
-								Sd2r[i]+=Sd2r[j];
-								Sd2r[j]=0;
-								det.TSd2rNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-							else if (Sd2r[i]<Sd2r[j]){
-								Sd2r[j]+=Sd2r[i];
-								Sd2r[i]=0;
-								det.TSd2rNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-						}
+		for (Int_t i=0; i<det.TSd1sMul; i++){
+			if(det.TSd1sMul>i+1){
+				for(Int_t j=i+1; j<det.TSd1sMul; j++){
+					if(TMath::Abs(det.TSd1sChannel.at(i)-det.TSd1sChannel.at(j))==1||TMath::Abs(det.TSd1sChannel.at(i)-det.TSd1sChannel.at(j))==31){
+						det.TSd1sEnergy.at(i)+=det.TSd1sEnergy.at(j);
+						det.TSd1sNeighbour.at(i)=det.TSd1sChannel.at(j);
+						det.TSd1sMul--;
+						det.TSd1sEnergy.erase(det.TSd1sEnergy.begin()+j);
+						det.TSd1sChannel.erase(det.TSd1sChannel.begin()+j);
+						det.TSd1sNeighbour.erase(det.TSd1sNeighbour.begin()+j);
+						det.TSd1Phi.erase(det.TSd1Phi.begin()+j);
+						break;
 					}
 				}
 			}
+			if(det.TSd1sMul>=i) break;
+		}
+  */
 
-		det.TSd2rEnergy.resize(det.TSd1rMul);
-		det.TSd2rChannel.resize(det.TSd1rMul);
-		det.TSd2Theta.resize(det.TSd1rMul);
-		int Sd2rxhit = 0;
+		// 2nd downstream S3, ring side
 		for (Int_t i=0;i<NSd2rChannels;i++){
-    		maxE = 3840.;
+    		maxE = 0.;
     		maxCh = -1;
     		for (Int_t j=0;j<NSd2rChannels;j++){
-        		if(Sd2r[j] < maxE && Sd2r[j]>0){
+        		if(Sd2r[j] > maxE){
             		maxE = Sd2r[j];
             		maxCh = j;
         		}
     		}		
     
-   			if(maxE>0.01 && maxE<3840){ 
+   			if(maxE>0.){ 
 				det.TSd2rMul++;
-				if(gUseRaw) det.TSd2rADC.push_back(Sd2rADC[maxCh]);
-				//det.TSd2rNeighbour.push_back(-1);
+    			det.TSd2rEnergy.push_back(Sd2r[maxCh]);
+        if(gUseRaw) det.TSd2rADC.push_back(Sd2rADC[maxCh]);
+				det.TSd2rChannel.push_back(maxCh);
+				det.TSd2rNeighbour.push_back(-1);
 				rndm = fRandom.Rndm(); //random number between 0 and 0.99 for each event
 				theta = TMath::RadToDeg()*atan((geoM.SdInnerRadius*(24.-maxCh-rndm)+geoM.SdOuterRadius*(maxCh+rndm))/24./(geoM.Sd1Distance+14.8));
-				if (det.TSd1rMul>0){
-					for(Int_t k=0;k<det.TSd1rMul;k++){
-						if((maxCh-det.TSd1rChannel.at(k))>=0 && (maxCh-det.TSd1rChannel.at(k))<=2 ){ //Sd1rChannel match Sd2rChannel+2
-							if(det.TSd2rEnergy.at(k)==0){ 											 //Sd1rChannel match Sd2rChannel+2. Check if there is already an energy in the hit
-							det.TSd2rEnergy.at(k)=Sd2r[maxCh];
-							det.TSd2rChannel.at(k)=maxCh;
-							det.TSd2Theta.at(k)=theta;
-							Sd2r[maxCh] = 0.;
-        					Sd2rADC[maxCh] = 0;
-							break;
-							}
-						}
-					}
-				}
-				if (Sd2r[maxCh]!=0) {																	//Sd1rChannel does not match Sd2rChannel+2. Place energy in TSd1rhit++;
-				det.TSd2rEnergy.resize(det.TSd1rMul+Sd2rxhit+1);
-				det.TSd2rChannel.resize(det.TSd1rMul+Sd2rxhit+1);
-				det.TSd2Theta.resize(det.TSd1rMul+Sd2rxhit+1);
-				
-				det.TSd2rEnergy.at(det.TSd1rMul+Sd2rxhit)=Sd2r[maxCh];
-				det.TSd2rChannel.at(det.TSd1rMul+Sd2rxhit)=maxCh;
-				det.TSd2Theta.at(det.TSd1rMul+Sd2rxhit)=theta;
-				Sd2rxhit++;
+				det.TSd2Theta.push_back(theta); //AS theta angle for Sd (24 - number of rings)
 				Sd2r[maxCh] = 0.;
-        		Sd2rADC[maxCh] = 0;
-				}
+        Sd2rADC[maxCh] = 0;
 			}
 			else break;
-		}
-			
-				/*if(gEventNumber<100000){
-				std::ofstream SdrEnergyCheck(Form("/home/saurabh/Study/Study/Experiment/TreeIrisTest/SdEnergyCheck/SdrEnergyCheck_%d.txt",gRunNumber), std::ios::app);
-				if(det.TSd1rMul>0 || det.TSd2rMul>0){
-					SdrEnergyCheck << gEventNumber << "\t";
-				for (Int_t k = 0; k < det.TSd1rMul; k++) { 
-					 SdrEnergyCheck << det.TSd1rChannel.at(k) << "\t" << det.TSd1rEnergy.at(k) << "\t" ;}
+    	}
 
-					SdrEnergyCheck << "\t\t\t\t\t\t;";
-					for (Int_t l = 0; l < det.TSd2rEnergy.size(); l++) { 
-					SdrEnergyCheck  << det.TSd2rChannel.at(l)  << "\t" << det.TSd2rEnergy.at(l) << "\t"; 
-					}
-					SdrEnergyCheck << std::endl;
-				}	
-				SdrEnergyCheck.close();}*/
-
-
-		// 2nd downstream S3, sector side
+  /*			
 		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
-			for (Int_t i=0;i<32;i++){
-				for (Int_t j=0;j<32;j++){
-					if (j-i==1 || j-i==31 ){
-						if(Sd2s[i]>0 && Sd2s[j]>0){
-							if(Sd2s[i]>Sd2s[j]){
-								Sd2s[i]+=Sd2s[j];
-								Sd2s[j]=0;
-								det.TSd2sNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-							else if (Sd2s[i]<Sd2s[j]){
-								Sd2s[j]+=Sd2s[i];
-								Sd2s[i]=0;
-								det.TSd2sNeighbour.push_back(1);
-								i++;
-								j++;
-							}
-						}
+		for (Int_t i=0; i<det.TSd2rMul; i++){
+			if(det.TSd2rMul>i+1){
+				for(Int_t j=i+1; j<det.TSd2rMul; j++){
+					if(TMath::Abs(det.TSd2rChannel.at(i)-det.TSd2rChannel.at(j))==1){
+						det.TSd2rEnergy.at(i)+=det.TSd2rEnergy.at(j);
+						det.TSd2rNeighbour.at(i)=det.TSd2rChannel.at(j);
+						det.TSd2rMul--;
+						det.TSd2rEnergy.erase(det.TSd2rEnergy.begin()+j);
+						det.TSd2rChannel.erase(det.TSd2rChannel.begin()+j);
+						det.TSd2rNeighbour.erase(det.TSd2rNeighbour.begin()+j);
+						det.TSd2Theta.erase(det.TSd2Theta.begin()+j);
+						break;
 					}
 				}
 			}
+			if(det.TSd2rMul>=i) break;
+		}
+  */		
 
-		det.TSd2sEnergy.resize(det.TSd1sMul);
-		det.TSd2sChannel.resize(det.TSd1sMul);
-		det.TSd2Phi.resize(det.TSd1sMul);
-		int Sd2sxhit = 0;
+		// 2nd downstream S3, sector side
 		for (Int_t i=0;i<NSd2sChannels;i++){
-    		maxE = 3840;
+    		maxE = 0.;
     		maxCh = -1;
     		for (Int_t j=0;j<NSd2sChannels;j++){
-        		if(Sd2s[j] < maxE && Sd2s[j]>0){
+        		if(Sd2s[j] > maxE){
             		maxE = Sd2s[j];
             		maxCh = j;
         		}
     		}		
     
-   			if(maxE>0.01 && maxE<3840){ 
+   			if(maxE>0.){ 
 				det.TSd2sMul++;
-				if(gUseRaw) det.TSd2sADC.push_back(Sd2sADC[maxCh]);
-				///det.TSd2sNeighbour.push_back(-1);
+    			det.TSd2sEnergy.push_back(Sd2s[maxCh]);
+        if(gUseRaw) det.TSd2sADC.push_back(Sd2sADC[maxCh]);
+				det.TSd2sChannel.push_back(maxCh);
+				det.TSd2sNeighbour.push_back(-1);
 				phi = 180.-360.*maxCh/32.;
 				rndm = fRandom.Rndm(); //random number between 0 and 0.99 for each event
-				if (det.TSd1sMul>0){
-					for(Int_t k=0;k<det.TSd1sMul;k++){
-						if((maxCh-det.TSd1sChannel.at(k))==-1 || (maxCh-det.TSd1sChannel.at(k))==0 || (maxCh-det.TSd1sChannel.at(k))==1 || (maxCh-det.TSd1sChannel.at(k))==31 || (maxCh-det.TSd1sChannel.at(k))==-31){ //Check if Sd1sChannel matches 
-							if(det.TSd2sEnergy.at(k)==0){ 											 //Sd1sChannel match Sd2sChannel. Check if there is already an energy in the hit
-							det.TSd2sEnergy.at(k)=Sd2s[maxCh];
-							det.TSd2sChannel.at(k)=maxCh;
-							det.TSd2Phi.at(k)=(phi-11.25*rndm);
-							Sd2s[maxCh] = 0.;
-        					Sd2sADC[maxCh] = 0;
-							break;
-							}
-						}
-					}
-				}
-				if (Sd2s[maxCh]!=0) {																	//Sd1sChannel does not match Sd2rChannel of if hit not assigned. Place energy in TSd1sMul++;
-				det.TSd2sEnergy.resize(det.TSd1sMul+Sd2sxhit+1);
-				det.TSd2sChannel.resize(det.TSd1sMul+Sd2sxhit+1);
-				det.TSd2Phi.resize(det.TSd1sMul+Sd2sxhit+1);
-				
-				det.TSd2sEnergy.at(det.TSd1sMul+Sd2sxhit)=Sd2s[maxCh];
-				det.TSd2sChannel.at(det.TSd1sMul+Sd2sxhit)=maxCh;
-				det.TSd2Phi.at(det.TSd1sMul+Sd2sxhit)=(phi-11.25*rndm);
-				Sd2sxhit++;
+				det.TSd2Phi.push_back(phi-11.25*rndm);
+
 				Sd2s[maxCh] = 0.;
-        		Sd2sADC[maxCh] = 0;
-				}
+        Sd2sADC[maxCh] = 0;
 			}
 			else break;
     	}
 
-			
-			/*if(gEventNumber<100000){
-				std::ofstream SdsEnergyCheck(Form("/home/saurabh/Study/Study/Experiment/TreeIrisTest/SdEnergyCheck/SdsEnergyCheck_%d.txt",gRunNumber), std::ios::app);
-				if(det.TSd1sMul>0 || det.TSd2sMul>0){
-					SdsEnergyCheck << gEventNumber << "\t" ;
-				for (Int_t k = 0; k < det.TSd1sMul; k++) { 
-					SdsEnergyCheck << det.TSd1sChannel.at(k) << "\t" << det.TSd1sEnergy.at(k) << "\t" ;}
-
-					SdsEnergyCheck << "\t\t\t\t\t\t;";
-					for (Int_t l = 0; l < det.TSd2sEnergy.size(); l++) { 
-					SdsEnergyCheck  << det.TSd2sChannel.at(l)  << "\t" << det.TSd2sEnergy.at(l) << "\t"; 
-					}
-					SdsEnergyCheck << std::endl;
-				
-				}	
-				SdsEnergyCheck.close();}*/
-
-			
-			/*
-			
-			for (Int_t i=0;i<16;i++){
-    		maxE = 0.;
-    		maxCh = -1;
-    		for (Int_t j=0;j<8;j++){
-        		Int_t k = i+j*16
-            		maxE = Yd[k];
-            		maxCh = k;
-        		
-    		}		
-    
-   			if(maxE>0.1){ 
-				det.TYdMul++;
-    			det.TYdEnergy.push_back(Yd[maxCh]);
-        if(gUseRaw) det.TYdADC.push_back(YdADC[maxCh]);
-				det.TYdChannel.push_back(maxCh);
-				det.TYdNeighbour.push_back(-1);
-				det.TYdNo.push_back(int(maxCh/16));
-				det.TYdRing.push_back(maxCh%16);
-				rndm = fRandom.Rndm();
-				theta = TMath::RadToDeg()*atan((geoM.YdInnerRadius*(16.-maxCh%16-rndm)+geoM.YdOuterRadius*(maxCh%16+rndm))/16./geoM.YdDistance);
-				det.TYdTheta.push_back(theta);
-
-				phi = 90.+1.75-360.*(maxCh/16)/8.;
-					  rndm = 44.8*fRandom.Rndm();
-					  phi = phi-22.4+rndm;
-					  phi = (phi<-180.)? phi+360. : phi;
-					  det.TYdPhi.push_back(phi);
-
-
-				Yd[maxCh] = 0.;
-        YdADC[maxCh] = 0;
-			}
-			else break;
-    	}
-
-  
+  /*		
 		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
-		for (Int_t i=0; i<det.TYdMul; i++){
-			if(det.TYdMul>i+1){
-				for(Int_t j=i+1; j<det.TYdMul; j++){
-					if(TMath::Abs(det.TYdChannel.at(i)-det.TYdChannel.at(j))==1&&det.TYdNo.at(i)-det.TYdNo.at(j)==0){
-						det.TYdEnergy.at(i)+=det.TYdEnergy.at(j);
-						det.TYdNeighbour.at(i)=det.TYdChannel.at(j);
-						det.TYdMul--;
-						det.TYdEnergy.erase(det.TYdEnergy.begin()+j);
-						det.TYdChannel.erase(det.TYdChannel.begin()+j);
-						det.TYdNeighbour.erase(det.TYdNeighbour.begin()+j);
-						det.TYdNo.erase(det.TYdNo.begin()+j);
-						det.TYdRing.erase(det.TYdRing.begin()+j);
-						det.TYdTheta.erase(det.TYdTheta.begin()+j);
+		for (Int_t i=0; i<det.TSd2sMul; i++){
+			if(det.TSd2sMul>i+1){
+				for(Int_t j=i+1; j<det.TSd2sMul; j++){
+					if(TMath::Abs(det.TSd2sChannel.at(i)-det.TSd2sChannel.at(j))==1||TMath::Abs(det.TSd2sChannel.at(i)-det.TSd2sChannel.at(j))==31){
+						det.TSd2sEnergy.at(i)+=det.TSd2sEnergy.at(j);
+						det.TSd2sNeighbour.at(i)=det.TSd2sChannel.at(j);
+						det.TSd2sMul--;
+						det.TSd2sEnergy.erase(det.TSd2sEnergy.begin()+j);
+						det.TSd2sChannel.erase(det.TSd2sChannel.begin()+j);
+						det.TSd2sNeighbour.erase(det.TSd2sNeighbour.begin()+j);
+						det.TSd2Phi.erase(det.TSd2Phi.begin()+j);
 						break;
 					}
 				}
 			}
-			if(det.TYdMul>=i) break;
-		}*/
-		
+			if(det.TSd2sMul>=i) break;
+		}
+  */
+		// Upstream S3, ring side
+		for (Int_t i=0;i<NSurChannels;i++){
+    		maxE = 0.;
+    		maxCh = -1;
+    		for (Int_t j=0;j<NSurChannels;j++){
+        		if(Sur[j] > maxE){
+            		maxE = Sur[j];
+            		maxCh = j;
+        		}
+    		}		
+    
+   			if(maxE>0.){ 
+				det.TSurMul++;
+    			det.TSurEnergy.push_back(Sur[maxCh]);
+        if(gUseRaw) det.TSurADC.push_back(SurADC[maxCh]);
+				det.TSurChannel.push_back(maxCh);
+				det.TSurNeighbour.push_back(-1);
+				rndm = fRandom.Rndm(); //random number between 0 and 0.99 for each event
+				theta = TMath::RadToDeg()*atan((geoM.SdInnerRadius*(maxCh+rndm)+geoM.SdOuterRadius*(24-maxCh-rndm))/24./(geoM.SuDistance)) + 180.;
+				det.TSuTheta.push_back(theta); //AS theta angle for Sd (24 - number of rings)
+
+				Sur[maxCh] = 0.;
+        SurADC[maxCh] = 0;
+			}
+			else break;
+    	}
+	
+  /*		
+		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
+		for (Int_t i=0; i<det.TSurMul; i++){
+			if(det.TSurMul>i+1){
+				for(Int_t j=i+1; j<det.TSurMul; j++){
+					if(TMath::Abs(det.TSurChannel.at(i)-det.TSurChannel.at(j))==1){
+						det.TSurEnergy.at(i)+=det.TSurEnergy.at(j);
+						det.TSurNeighbour.at(i)=det.TSurChannel.at(j);
+						det.TSurMul--;
+						det.TSurEnergy.erase(det.TSurEnergy.begin()+j);
+						det.TSurChannel.erase(det.TSurChannel.begin()+j);
+						det.TSurNeighbour.erase(det.TSurNeighbour.begin()+j);
+						det.TSuTheta.erase(det.TSuTheta.begin()+j);
+						break;
+					}
+				}
+			}
+			if(det.TSurMul>=i) break;
+		}
+  */
+
+		// Upstream S3, sector side
+		for (Int_t i=0;i<NSusChannels;i++){
+    		maxE = 0.;
+    		maxCh = -1;
+    		for (Int_t j=0;j<NSusChannels;j++){
+        		if(Sus[j] > maxE){
+            		maxE = Sus[j];
+            		maxCh = j;
+        		}
+    		}		
+    
+   			if(maxE>0.){ 
+				det.TSusMul++;
+    			det.TSusEnergy.push_back(Sus[maxCh]);
+        if(gUseRaw) det.TSusADC.push_back(SusADC[maxCh]);
+				det.TSusChannel.push_back(maxCh);
+				det.TSusNeighbour.push_back(-1);
+				phi = 180.-360.*maxCh/32.;
+				rndm = fRandom.Rndm(); //random number between 0 and 0.99 for each event
+				det.TSuPhi.push_back(phi-11.25*rndm);
+	
+				Sus[maxCh] = 0.;
+        SusADC[maxCh] = 0;
+			}
+			else break;
+    	}
+		 /*
+		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
+		for (Int_t i=0; i<det.TSusMul; i++){
+			if(det.TSusMul>i+1){
+				for(Int_t j=i+1; j<det.TSusMul; j++){
+					if(TMath::Abs(det.TSusChannel.at(i)-det.TSusChannel.at(j))==1||TMath::Abs(det.TSusChannel.at(i)-det.TSusChannel.at(j))==31){
+						det.TSusEnergy.at(i)+=det.TSusEnergy.at(j);
+						det.TSusNeighbour.at(i)=det.TSusChannel.at(j);
+						det.TSusMul--;
+						det.TSusEnergy.erase(det.TSusEnergy.begin()+j);
+						det.TSusChannel.erase(det.TSusChannel.begin()+j);
+						det.TSusNeighbour.erase(det.TSusNeighbour.begin()+j);
+						det.TSuPhi.erase(det.TSuPhi.begin()+j);
+						break;
+					}
+				}
+			}
+			if(det.TSusMul>=i) break;
+		}
+  */
+
 		// Downstream YY1
 		for (Int_t i=0;i<NYdChannels;i++){
     		maxE = 0.;
@@ -772,16 +949,10 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 				det.TYdNeighbour.push_back(-1);
 				det.TYdNo.push_back(int(maxCh/16));
 				det.TYdRing.push_back(maxCh%16);
-				rndm = fRandom.Rndm();
+				//      		rndm = fRandom.Rndm();
+					rndm=0;
 				theta = TMath::RadToDeg()*atan((geoM.YdInnerRadius*(16.-maxCh%16-rndm)+geoM.YdOuterRadius*(maxCh%16+rndm))/16./geoM.YdDistance);
 				det.TYdTheta.push_back(theta);
-
-				phi = 90.+1.75-360.*(maxCh/16)/8.;
-					  rndm = 44.8*fRandom.Rndm();
-					  phi = phi-22.4+rndm;
-					  phi = (phi<-180.)? phi+360. : phi;
-					  det.TYdPhi.push_back(phi);
-
 
 				Yd[maxCh] = 0.;
         YdADC[maxCh] = 0;
@@ -789,7 +960,7 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 			else break;
     	}
 
-  
+  /*
 		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
 		for (Int_t i=0; i<det.TYdMul; i++){
 			if(det.TYdMul>i+1){
@@ -810,10 +981,63 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 			}
 			if(det.TYdMul>=i) break;
 		}
-  
+  */
+
+		// Upstream YY1
+		for (Int_t i=0;i<NYuChannels;i++){
+    		maxE = 0.;
+    		maxCh = -1;
+    		for (Int_t j=0;j<NYuChannels;j++){
+        		if(Yu[j] > maxE){
+            		maxE = Yu[j];
+            		maxCh = j;
+        		}
+    		}		
+    
+   			if(maxE>0.){ 
+				det.TYuMul++;
+    			det.TYuEnergy.push_back(Yu[maxCh]);
+        if(gUseRaw) det.TYuADC.push_back(YuADC[maxCh]);
+				det.TYuChannel.push_back(maxCh);
+				det.TYuNeighbour.push_back(-1);
+				det.TYuNo.push_back(int(maxCh/16));
+				det.TYuRing.push_back(maxCh%16);
+				//here
+				rndm = fRandom.Rndm();
+				theta = TMath::RadToDeg()*atan((geoM.YdInnerRadius*(16.-maxCh%16-rndm)+geoM.YdOuterRadius*(maxCh%16+rndm))/16./geoM.YuDistance) + 180.;
+				det.TYuTheta.push_back(theta);
+
+				Yu[maxCh] = 0.;
+        YuADC[maxCh] = 0;
+			}
+			else break;
+    	}
+	
+  /*
+		// correct for charge sharing. Check if two neighbouring channels have a signal, then add them up.
+		for (Int_t i=0; i<det.TYuMul; i++){
+			if(det.TYuMul>i+1){
+				for(Int_t j=i+1; j<det.TYuMul; j++){
+					if(TMath::Abs(det.TYuChannel.at(i)-det.TYuChannel.at(j))==1&&det.TYuNo.at(i)-det.TYuNo.at(j)==0.){
+						det.TYuEnergy.at(i)+=det.TYuEnergy.at(j);
+						det.TYuNeighbour.at(i)=det.TYuChannel.at(j);
+						det.TYuMul--;
+						det.TYuEnergy.erase(det.TYuEnergy.begin()+j);
+						det.TYuChannel.erase(det.TYuChannel.begin()+j);
+						det.TYuNeighbour.erase(det.TYuNeighbour.begin()+j);
+						det.TYuNo.erase(det.TYuNo.begin()+j);
+						det.TYuRing.erase(det.TYuRing.begin()+j);
+						det.TYuTheta.erase(det.TYuTheta.begin()+j);
+						break;
+					}
+				}
+			}
+			if(det.TYuMul>=i) break;
+		}
+  */
 
 		// Zero-degree DSSD, vertical strips
-		/*for (Int_t i=0;i<NZdxChannels;i++){
+		for (Int_t i=0;i<NZdxChannels;i++){
     		maxE = 0.;
     		maxCh = -1;
     		for (Int_t j=0;j<NZdxChannels;j++){
@@ -876,14 +1100,8 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 			det.TZdTheta.push_back(theta);
 			phi = TMath::ATan2(det.TZdyPos.at(i),det.TZdxPos.at(i))*TMath::RadToDeg();
 			det.TZdPhi.push_back(phi);
-		}*/
-		
-		
+		}
 		// CsI
-		det.TCsI1Energy.resize(det.TYdMul);
-		det.TCsI2Energy.resize(det.TYdMul);
-		det.TCsI1Channel.resize(det.TYdMul);
-		det.TCsI1Phi.resize(det.TYdMul);
 		for (Int_t i=0;i<NCsIChannels;i++){
     		maxE = 0.;
     		maxCh = 0;
@@ -894,45 +1112,25 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
         		}
     		}		
     
-   			if(maxE>0.01){ 
-				if (det.TYdMul>0){
-					for(Int_t l=0;l<det.TYdMul;l++){
-						if(((maxCh/2)-det.TYdNo.at(l))==0){
-							det.TCsI1Mul++;
-	      					int m = (det.TYdChannel.at(l)%16)/(16/NCsI1Group);
-							
-							double rawECsI2 = (CsI1[maxCh] - CsI2Ped[m][maxCh]) * CsI2Gain[m][maxCh];
-							double *c = coeffs[maxCh];
-							//double ECsI2 = c[0]*rawECsI2*rawECsI2*rawECsI2 + c[1]*rawECsI2*rawECsI2 + c[2]*rawECsI2 + c[3];
-							double ECsI2 = c[0]*rawECsI2 + c[1];
-							det.TCsI1Energy.at(l) = ECsI2;
-							
-							//double rawECsI1 = (CsI1[maxCh] - CsI1Ped[m][maxCh]) * CsI1Gain[m][maxCh];
-							//double ECsI1 = c[0]*rawECsI1*rawECsI1*rawECsI1 + c[1]*rawECsI1*rawECsI1 + c[2]*rawECsI1 + c[3];
-							//double ECsI1 = c[0]*rawECsI1+ c[1];
-							det.TCsI1Energy.at(l) = ECsI1;
-							det.TCsI1Channel.at(l)=maxCh;
-              				//printf("%d  %d  %lf  %lf\n",maxCh+32,m,CsI1Ped[m][maxCh],CsI1Gain[m][maxCh]);
-              				if(gUseRaw) det.TCsI1ADC.push_back(CsI1ADC[maxCh]);
-          					//if(maxCh==5 && m==3){ //Sector 5, ring 3.
-          					//  printf("%lf  %lf  %lf  %lf\n",CsI1[maxCh],CsI1Ped[maxCh],CsI1Gain[m][maxCh],det.TCsI1Energy.back());
-          					//}
-							phi = 90.+1.75-360.*maxCh/16.;
-							rndm = 22.4*fRandom.Rndm();
-							phi = phi-11.2+rndm;
-							phi = (phi<-180.)? phi+360. : phi;
-							det.TCsI1Phi.at(l)=phi;
-							det.TYdPhi.at(l)=phi;
-
-							//rawECsI1 = 0;
-							rawECsI2 = 0;
-							ECsI2 = 0;
-							ECsI1 =0;
-						}
-					}
+   			if(maxE>0.){ 
+				det.TCsI1Mul++;
+    			if (det.TYdMul>0){
+	      			int m = (det.TYdChannel.at(0)%16)/(16/NCsI1Group);
+	      			det.TCsI1Energy.push_back((CsI1[maxCh]-CsI1Ped[m][maxCh])*CsI1Gain[m][maxCh]);
+              //printf("%d  %d  %lf  %lf\n",maxCh+32,m,CsI1Ped[m][maxCh],CsI1Gain[m][maxCh]);
+              if(gUseRaw) det.TCsI1ADC.push_back(CsI1ADC[maxCh]);
+	      			det.TCsI1Channel.push_back(maxCh);
+          //if(maxCh==5 && m==3){ //Sector 5, ring 3.
+          //  printf("%lf  %lf  %lf  %lf\n",CsI1[maxCh],CsI1Ped[maxCh],CsI1Gain[m][maxCh],det.TCsI1Energy.back());
+          //}
+					phi = 90.+1.75-360.*maxCh/16.;
+					rndm = 22.4*fRandom.Rndm();
+					phi = phi-11.2+rndm;
+					phi = (phi<-180.)? phi+360. : phi;
+					det.TCsI1Phi.push_back(phi);
 	    		}
           else{  //We cannot calibrate the signal, but ADC value is still stored
-	      	    det.TCsI1Energy.push_back(0);
+	      	  det.TCsI1Energy.push_back(0);
             if(gUseRaw) det.TCsI1ADC.push_back(CsI1ADC[maxCh]);
 	      		det.TCsI1Channel.push_back(maxCh);
   					phi = 90.+1.75-360.*maxCh/16.;
@@ -947,7 +1145,48 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 			else break;
     	}
 
-	/*// Re-sorting Yd if hits don't match with CsI
+		for (Int_t i=0;i<NCsIChannels;i++){
+    		maxE = 0.;
+    		maxCh = 0;
+    		for (Int_t j=0;j<NCsIChannels;j++){
+        		if(CsI2[j] > maxE){
+            		maxE = CsI2[j];
+            		maxCh = j;
+        		}
+    		}		
+    
+   			if(maxE>0.){ 
+				det.TCsI2Mul++;
+    			//if (CsI2[maxCh] < 3840. && det.TYdMul>0){
+          if (det.TYdMul>0){
+					  int m = (det.TYdChannel.at(0)%16)/(16/NCsI2Group);
+	        	det.TCsI2Energy.push_back((CsI2[maxCh]-CsI2Ped[m][maxCh])*CsI2Gain[m][maxCh]);
+            if(gUseRaw) det.TCsI2ADC.push_back(CsI2ADC[maxCh]);
+	        	det.TCsI2Channel.push_back(maxCh);
+					  phi = 90.+1.75-360.*maxCh/16.;
+					  rndm = 22.4*fRandom.Rndm();
+					  phi = phi-11.2+rndm;
+					  phi = (phi<-180.)? phi+360. : phi;
+					  det.TCsI2Phi.push_back(phi);
+	        }
+          else{
+            det.TCsI2Energy.push_back(0.);
+            if(gUseRaw) det.TCsI2ADC.push_back(CsI2ADC[maxCh]);
+	        	det.TCsI2Channel.push_back(maxCh);
+					  phi = 90.+1.75-360.*maxCh/16.;
+					  rndm = 22.4*fRandom.Rndm();
+					  phi = phi-11.2+rndm;
+					  phi = (phi<-180.)? phi+360. : phi;
+					  det.TCsI2Phi.push_back(phi);
+          }
+				CsI2[maxCh] = 0.;
+        CsI2ADC[maxCh] = 0;
+			}
+			else break;
+    	}
+
+  /*
+		// Re-sorting Yd if hits don't match with CsI
 		if(det.TCsI1Channel.size()>0&&det.TYdNo.size()>1&&calMesy.boolCsI1==true) // only check if YY1 has more than one hit and CsI has a hit and has been calibrated
 		{
  			if (int(det.TCsI1Channel.at(0)/2)-det.TYdNo.at(0)!=0 && int(det.TCsI1Channel.at(0)/2)-det.TYdNo.at(1)==0)//checking if the CsI hit is behind the first or second hit in  YY1
@@ -958,7 +1197,8 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 				std::swap(det.TYdRing.at(0),det.TYdRing.at(1));
 				std::swap(det.TYdTheta.at(0),det.TYdTheta.at(1));
 			}
-		}*/
+		}
+  */
 
 		// IC
 		/*
@@ -1632,7 +1872,7 @@ void HandleBOR_Mesytec(int run, int gFileNumber, int time, IDet* pdet, std::stri
     		fscanf(pFile,"%d%lf%lf",&Chan,&a,&b);
 			if(Chan==run){
 				run_for_corr = Chan;
-				SiTCorrFactor = b;
+				SiTCorrFactor1 = b;
 			}	   
     	}
     	fclose (pFile);
@@ -1640,7 +1880,7 @@ void HandleBOR_Mesytec(int run, int gFileNumber, int time, IDet* pdet, std::stri
 			printf("Run %d not in list. No correction applied!\n",run);
 		}
 		else{
-			printf("Run: %d\tSi Gain correction: %f\n",run_for_corr,SiTCorrFactor);
+			printf("Run: %d\tSi Gain correction: %f\n",run_for_corr,SiTCorrFactor1);
 			for(int i=0; i<NCsIChannels; i++){
 				for(int j=0; j<NCsI1Group; j++){
 					CsI1Gain[j][i] *= 1/SiTCorrFactor;
@@ -1656,10 +1896,10 @@ void HandleBOR_Mesytec(int run, int gFileNumber, int time, IDet* pdet, std::stri
 				Sd1sGain[i] *= 1/SiTCorrFactor;
 			}
 			for(int i=0; i<NSd2rChannels; i++){
-				Sd2rGain[i] *= 1/SiTCorrFactor;
+				Sd2rGain[i] *= 1/SiTCorrFactor1;
 			}
 			for(int i=0; i<NSd2sChannels; i++){
-				Sd2sGain[i] *= 1/SiTCorrFactor;
+				Sd2sGain[i] *= 1/SiTCorrFactor1;
 			}
 			for(int i=0; i<NSurChannels; i++){
 				SurGain[i] *= 1/SiTCorrFactor;

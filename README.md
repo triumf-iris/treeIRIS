@@ -21,9 +21,87 @@ compile treeIris with
 
 From the main treeIris folder, you can run treeIris with
  
-	./bin/treeIris -c=/path/to/your/config.file -o=/path/to/to/your/output.file /path/to/your/input.file
+	Pedastal 
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/home/saurabh/Study/root_v6.28.06.source/Analysis/pedastal/iris_000107880000.root /home/saurabh/Study/root_v6.28.06.source/Analysis/pedastal/iris_000107880000.mid.gz
+	
+	Alpha Calibration
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/media/saurabh/ZX20/Study/Analysis/Calibration/AlphaCalibration/iris_105850.root /media/saurabh/ZX20/Study/Analysis/Calibration/AlphaCalibration/iris_000105850000.mid.gz 
+	
+	12C+H 
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/home/saurabh/Study/root_v6.28.06.source/Analysis/12Cruns/12C_H/iris_000106140000.root /home/saurabh/Study/root_v6.28.06.source/Analysis/12Cruns/12C_H/iris_000106140000.mid.gz
+	
+##Tree-Check##
+
+    ./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/home/saurabh/Study/Study/Experiment/TreeIrisTest/tree0658.root /home/saurabh/Study/Study/Experiment/TreeIrisTest/iris_000106580000.mid.gz
+
+##For files on hard drive##
+
+	Pedastal
+	
+##Alpha Calibration##
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config_raw.txt -o=/home/saurabh/Study/root_v6.28.06.source/Analysis/Alpha_Caibration/tree011958.root /home/saurabh/Study/root_v6.28.06.source/Analysis/Alpha_Caibration/iris_000119580000.mid.gz
+	
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/media/saurabh/ZX20/Study/Analysis/Calibration/Pulser/iris_000105950000.root /media/saurabh/ZX20/Study/Analysis/Calibration/Pulser/iris_000105950000.mid.gz
+	
+	
+	
+##test##
+
+    ./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config_test.txt -o=/home/saurabh/Study/Study/Experiment/S1752/tree011114.root /home/saurabh/Study/Study/Experiment/Sept24/iris_000111140000.mid.gz
+	
+	
+##Beam Calibration##
+
+##12C-Ag##
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/media/saurabh/ZX20/Study/Analysis/12C/Ag/iris_000106060000.root /media/saurabh/ZX20/Study/Analysis/12C/Ag/iris_000106060000.mid.gz
+	
+##12C-Ag-H##
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/media/saurabh/ZX20/Study/Analysis/12C/Ag_H/iris_000106320000.root /media/saurabh/ZX20/Study/Analysis/12C/Ag_H/iris_000106320000.mid.gz
+	
+	
+
+
+
+
+
+
+##9Li-Ag##
+	
+## Before ##
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/media/saurabh/ZX20/Study/Analysis/9Li/Ag/19_Oct/iris_00010655000012C.root /media/saurabh/ZX20/Study/Analysis/9Li/Ag/19_Oct/iris_000106550000.mid.gz
+	
+
+## After ##
+
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/media/saurabh/ZX20/Study/Analysis/9Li/Ag/22_Oct/iris_000107470000.root /media/saurabh/ZX20/Study/Analysis/9Li/Ag/22_Oct/iris_000107470000.mid.gz
+	
+	
+##9Li-H##
+
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/home/saurabh/Study/Study/Experiment/TreeIrisTest/iris_10658NCal.root /home/saurabh/Study/Study/Experiment/TreeIrisTest/iris_000106580000.mid.gz
+	
+	
+	
+##Test##
+
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config_test.txt -o=/home/saurabh/Study/root_v6.28.06.source/Analysis/Alpha_Caibration/tree010913.root /home/saurabh/Study/root_v6.28.06.source/Analysis/Alpha_Caibration/iris_000109130000.mid.gz
+	
+	./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/home/saurabh/Study/Study/Experiment/TreeIrisTest/iris_10658test.root /home/saurabh/Study/Study/Experiment/TreeIrisTest/iris_000106580000.mid.gz
+	
+##S1752
+./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config.txt -o=/home/saurabh/Study/Study/Experiment/TreeIrisTest/iris_10658test.root /home/saurabh/Study/Study/Experiment/TreeIrisTest/iris_000106580000.mid.gz
 
 The input file has to be a MIDAS file (eg. *.mid or *.mid.gz), the output file will be a root file. Uncalibrated ADC data can be requested with the option '-raw', TDC data with the option '-tdc'.
+
+./bin/treeIris -c=/home/saurabh/Study/root_v6.28.06.source/treeIris/calibration_files/config_8He.txt -o=/home/saurabh/Study/root_v6.28.06.source/Analysis/Alpha_Caibration/tree06878.root /home/saurabh/Study/root_v6.28.06.source/Analysis/Alpha_Caibration/iris_000068780000.mid.gz
 
 
 ## The Config File ##

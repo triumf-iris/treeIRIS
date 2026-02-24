@@ -146,7 +146,7 @@ float ZdyPed[NZdyChannels]={0.};
 // Time dependent corrections
 float SiTCorrFactor = 1.;
 float ICTCorrFactor = 1.;
-uint32_t adcThresh = 50;
+uint32_t adcThresh = 80;
 
 int ydNo, yuNo;
 
@@ -900,16 +900,36 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 						if(((maxCh/2)-det.TYdNo.at(l))==0){
 							det.TCsI1Mul++;
 	      					int m = (det.TYdChannel.at(l)%16)/(16/NCsI1Group);
+							double coeffs[16][2] = {
+							    { 0.99332543 ,	 -0.00393827},
+							    { 0.97567480 ,	 0.43473391},
+							    { 1.08142880 ,	 -0.62655320},
+							    { 1.04401475 ,	 -0.00275153},
+							    { 1.00000000 ,	 0.00000000},
+							    { 1.00965661 ,	 -0.17486326},
+							    { 1.02649957 ,	 0.31288524},
+							    { 1.02446472 ,	 0.41260022},
+							    { 1.02251274 ,	 0.85613947},
+							    { 1.02285022 ,	 0.75491888},
+							    { 0.97372383 ,	 0.90283996},
+							    { 1.00051718 ,	 0.22277703},
+							    { 1.03703224 ,	 0.47667803},
+							    { 1.01764486 ,	 0.81472872},
+							    { 1.00300073 ,	 -0.07120710},
+							    { 0.98281921 ,	 0.52168831}
+							};
+							
 							
 							double rawECsI2 = (CsI1[maxCh] - CsI2Ped[m][maxCh]) * CsI2Gain[m][maxCh];
 							double *c = coeffs[maxCh];
 							//double ECsI2 = c[0]*rawECsI2*rawECsI2*rawECsI2 + c[1]*rawECsI2*rawECsI2 + c[2]*rawECsI2 + c[3];
 							double ECsI2 = c[0]*rawECsI2 + c[1];
-							det.TCsI1Energy.at(l) = ECsI2;
+							det.TCsI2Energy.at(l) = ECsI2;
 							
-							//double rawECsI1 = (CsI1[maxCh] - CsI1Ped[m][maxCh]) * CsI1Gain[m][maxCh];
+							//double ECsI1 = -0.005604*ECsI2*ECsI2+1.464*ECsI2-5.162 ;
+							double rawECsI1 = (CsI1[maxCh] - CsI1Ped[m][maxCh]) * CsI1Gain[m][maxCh];
 							//double ECsI1 = c[0]*rawECsI1*rawECsI1*rawECsI1 + c[1]*rawECsI1*rawECsI1 + c[2]*rawECsI1 + c[3];
-							//double ECsI1 = c[0]*rawECsI1+ c[1];
+							double ECsI1 = c[0]*rawECsI1+ c[1];
 							det.TCsI1Energy.at(l) = ECsI1;
 							det.TCsI1Channel.at(l)=maxCh;
               				//printf("%d  %d  %lf  %lf\n",maxCh+32,m,CsI1Ped[m][maxCh],CsI1Gain[m][maxCh]);
@@ -924,10 +944,19 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 							det.TCsI1Phi.at(l)=phi;
 							det.TYdPhi.at(l)=phi;
 
-							//rawECsI1 = 0;
+							rawECsI1 = 0;
 							rawECsI2 = 0;
 							ECsI2 = 0;
 							ECsI1 =0;
+if(gEventNumber<100000){
+				std::ofstream CsIEnergyCheck_(Form("/home/saurabh/Study/Study/Experiment/TreeIrisTest/CsI1EnergyCheck/CsIEnergyCheck_%d.txt",gRunNumber), std::ios::app);
+				if(det.TYdMul>0){
+					CsIEnergyCheck_ << gEventNumber << "\t" ;
+				for (Int_t k = 0; k < det.TYdMul; k++) { 
+					CsIEnergyCheck_ << det.TCsI1Channel.at(k) << "\t" << maxCh << "\t" << c[0] << "\t" << c[1] << "\t";}
+					CsIEnergyCheck_ << std::endl;				
+				}	
+				CsIEnergyCheck_.close();}
 						}
 					}
 	    		}

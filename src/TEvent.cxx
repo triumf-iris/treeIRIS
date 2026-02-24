@@ -57,12 +57,13 @@ TEvent::TEvent(const TEvent &evt) : TObject(evt) //
 }
 
 Int_t TEvent::Clear(){
-	fEYY1 =0;             //
-	fCsI1=0;              //
-	fCsI2=0;              //
-	// fSd1=0;              //
-	// fSd2=0;              //
-	// fIC=0;               //
+		fEYY1 =0;             //
+	fEYd2 =0; 
+	fEYd3 =0; 
+	fCCsI1=0; // HLC 6/25/17
+	fCCsI2=0; // HLC 6/25/17
+	fECsI1=0;              //
+	fECsI2=0;              //
 	
 	fEBAC = sqrt(-1.);
 	fmA = sqrt(-1.);
@@ -74,25 +75,45 @@ Int_t TEvent::Clear(){
 	fbetaCM = sqrt(-1.);
 	fgammaCM = sqrt(-1.);
 	fPA = sqrt(-1.);
-  	fPBeam = sqrt(-1.);
+  	/*fPBeam = sqrt(-1.);
   	fPResid = sqrt(-1.);
   	fA = sqrt(-1.);
   	fB = sqrt(-1.);
-  	fC = sqrt(-1.);
+  	fC = sqrt(-1.);*/
   	fEb1 = sqrt(-1.);
   	fPb1 = sqrt(-1.);
   	fPb1y = sqrt(-1.);
   	fPb1xcm = sqrt(-1.);
+	fEb2 = sqrt(-1.);
+  	fPb2 = sqrt(-1.);
+  	fPb2y = sqrt(-1.);
+  	fPb2xcm = sqrt(-1.);
+	fEb3 = sqrt(-1.);
+  	fPb3 = sqrt(-1.);
+  	fPb3y = sqrt(-1.);
+  	fPb3xcm = sqrt(-1.);
 
-	fLP=0; //Light particle energy //
-	fHP=0; //Heavy particle energy //
-	fQv1=0;                         //
-	fQv2=0;                         //
-	fThetacm1=0;                         //
-	fThetacm2=0;                         //
-	fThetaD=0;                         //
-	fEB=0; //Beam energy           //
-	// fPart.Clear();
+	fLP=0; //Light particle energy
+	fHP=0; //Heavy particle energy
+	fEB=0; //Measured heavy particle energy
+	fEB1=0; //Calculated heavy particle energy
+	fPB1=0; //Calculated heavy particle momentum
+	fQv1=0;
+	fEB2=0; //Calculated heavy particle energy
+	fPB2=0; //Calculated heavy particle momentum
+	fQv2=0;
+	fEB3=0; //Calculated heavy particle energy
+	fPB3=0; //Calculated heavy particle momentum
+	fQv3=0;
+
+	
+	fThetacm1=0;
+	fThetacm2=0;
+	fThetacm3=0;
+	fThetaD=0;
+	fThetaD2=0;
+	fThetaD3=0;
+}
 return 1;
 }
 

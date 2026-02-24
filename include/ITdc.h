@@ -15,28 +15,28 @@ class ITdc : public TObject {
 		//Int_t TICTDC;
 		Int_t TICTMul;
 		std::vector<uint8_t> TICTChannel;
-    std::vector<uint32_t> TICTDC;
+                std::vector<uint32_t> TICTDC;
 		std::vector<Double_t> TICTime;
 		//std::vector<Double_t> TICTimeRF;
 		
 		//Int_t TYdTDC;
 		Int_t TYdTMul;
 		std::vector<uint8_t> TYdTChannel;
-    std::vector<uint32_t> TYdTDC;
+                std::vector<uint32_t> TYdTDC;
 		std::vector<Double_t> TYdTime;
 		//std::vector<Double_t> TYdTimeRF;
 		
 		//Int_t TYuTDC;
 		Int_t TYuTMul;
 		std::vector<uint8_t> TYuTChannel;
-    std::vector<uint32_t> TYuTDC;
+                std::vector<uint32_t> TYuTDC;
 		std::vector<Double_t> TYuTime;
 		//std::vector<Double_t> TYuTimeRF;
 		
 		//Int_t TSurTDC;
 		Int_t TSurTMul;
 		std::vector<uint8_t> TSurTChannel;
-    std::vector<uint32_t> TSurTDC;
+                std::vector<uint32_t> TSurTDC;
 		std::vector<Double_t> TSurTime;
 		//std::vector<Double_t> TSurTimeRF;
 		
@@ -75,9 +75,9 @@ class ITdc : public TObject {
 		std::vector<Double_t> TSd2sTime;
 		//std::vector<Double_t> TSd2sTimeRF;
 
-    //Just for testing.
-    std::vector<uint16_t> TChannel;
-    std::vector<uint32_t> TTDC;
+                //Just for testing.
+                std::vector<uint16_t> TChannel;
+                std::vector<uint32_t> TTDC;
 
     void Clear();
     ClassDef(ITdc,1)

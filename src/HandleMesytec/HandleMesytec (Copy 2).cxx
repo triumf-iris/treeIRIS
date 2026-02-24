@@ -146,7 +146,7 @@ float ZdyPed[NZdyChannels]={0.};
 // Time dependent corrections
 float SiTCorrFactor = 1.;
 float ICTCorrFactor = 1.;
-uint32_t adcThresh = 50;
+uint32_t adcThresh = 80;
 
 int ydNo, yuNo;
 
@@ -319,14 +319,18 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	  				
 					// CsI
 	  				if (modid==1 && vpeak > adcThresh && vpeak<3840){
-						if (channel<16){
+	    				if (channel<16){
 	    					CsI1[channel] = (float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5);
 	    					CsI1ADC[channel] = (float)vpeak;
+								std::ofstream CsI1EventCheck(Form("/home/saurabh/Study/Study/Experiment/TreeIrisTest/CsI1EnergyCheck/CsI1EventCheck_%d.txt",gRunNumber), std::ios::app);
+								if (gEventNumber == 1302457) {
+    				           	CsI1EventCheck << gEventNumber << "\t" << channel << "\t" << CsI1[channel] << std::endl;
+    				        	CsI1EventCheck.close();}
 	    	    		}	    
 		  				else if (channel>=16){
 	    					CsI2[channel-16] = (float)vpeak + gRandomise*fRandom.Uniform(-0.5,0.5);
 	    					CsI2ADC[channel-16] = (float)vpeak;
-	    	    		}
+	    	    		}	    
 	  				}
 	
 					// Second downstream S3 detector, rings
@@ -395,11 +399,12 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 	    				if (channel<16) ydNo = (modid-6)*2+1; //Yd number
 	    				if (channel>15) ydNo = (modid-6)*2+2;
 	  				}
-
+	  
+	 				
+	
 	  				break;
 			} // switch
 	  	} // for loop
-		
 	} // nitems != 0
 	
 	// After looping over banks, fill the root tree
@@ -900,17 +905,35 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 						if(((maxCh/2)-det.TYdNo.at(l))==0){
 							det.TCsI1Mul++;
 	      					int m = (det.TYdChannel.at(l)%16)/(16/NCsI1Group);
+							double coeffs[16][4] = {
+							    {  0.00031526, -0.02220361,  1.45591017, -2.33435698 },
+							    { -0.00037961,  0.02465368,  0.50464852,  2.91210549 },
+							    { -0.00046448,  0.03050747,  0.36142501,  3.80698665 },
+							    {  0.00011224, -0.00654569,  1.09305008, -0.41619135 },
+							    {  0.00000001, -0.00000041,  1.00000824, -0.00004714 },
+							    { -0.00041094,  0.02833320,  0.37495707,  3.85092741 },
+							    { -0.00031057,  0.02293120,  0.45448860,  3.32450154 },
+							    {  0.00026226, -0.01577725,  1.25610002, -1.62720451 },
+							    { -0.00029154,  0.01923697,  0.56834607,  2.19603051 },
+							    { -0.00000978,  0.00206962,  0.90761798,  0.31253480 },
+							    { -0.00000593,  0.00476566,  0.83680672,  0.76250082 },
+							    { -0.00002516,  0.00643163,  0.77624777,  1.28767170 },
+							    {  0.00015828, -0.00738420,  1.06777923, -0.50236561 },
+							    {  0.00000250,  0.00038779,  0.96410614, -0.09580873 },
+							    {  0.00023472, -0.01685259,  1.35349630, -2.18679253 },
+							    {  0.00013935, -0.00889206,  1.16791171, -0.83805349 }
+							};
 							
-							double rawECsI2 = (CsI1[maxCh] - CsI2Ped[m][maxCh]) * CsI2Gain[m][maxCh];
+							
+							double rawECsI1 = (CsI1[maxCh] - CsI1Ped[m][maxCh]) * CsI1Gain[m][maxCh];
 							double *c = coeffs[maxCh];
-							//double ECsI2 = c[0]*rawECsI2*rawECsI2*rawECsI2 + c[1]*rawECsI2*rawECsI2 + c[2]*rawECsI2 + c[3];
-							double ECsI2 = c[0]*rawECsI2 + c[1];
-							det.TCsI1Energy.at(l) = ECsI2;
-							
-							//double rawECsI1 = (CsI1[maxCh] - CsI1Ped[m][maxCh]) * CsI1Gain[m][maxCh];
-							//double ECsI1 = c[0]*rawECsI1*rawECsI1*rawECsI1 + c[1]*rawECsI1*rawECsI1 + c[2]*rawECsI1 + c[3];
-							//double ECsI1 = c[0]*rawECsI1+ c[1];
+							double ECsI1 = c[0]*rawECsI1*rawECsI1*rawECsI1 + c[1]*rawECsI1*rawECsI1 + c[2]*rawECsI1 + c[3];
 							det.TCsI1Energy.at(l) = ECsI1;
+							
+							
+							rawECsI1 = (CsI1[maxCh] - CsI2Ped[m][maxCh]) * CsI2Gain[m][maxCh];
+							ECsI1 = c[0]*rawECsI1*rawECsI1*rawECsI1 + c[1]*rawECsI1*rawECsI1 + c[2]*rawECsI1 + c[3];
+							det.TCsI2Energy.at(l) = ECsI1;
 							det.TCsI1Channel.at(l)=maxCh;
               				//printf("%d  %d  %lf  %lf\n",maxCh+32,m,CsI1Ped[m][maxCh],CsI1Gain[m][maxCh]);
               				if(gUseRaw) det.TCsI1ADC.push_back(CsI1ADC[maxCh]);
@@ -923,11 +946,6 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 							phi = (phi<-180.)? phi+360. : phi;
 							det.TCsI1Phi.at(l)=phi;
 							det.TYdPhi.at(l)=phi;
-
-							//rawECsI1 = 0;
-							rawECsI2 = 0;
-							ECsI2 = 0;
-							ECsI1 =0;
 						}
 					}
 	    		}
@@ -946,8 +964,8 @@ void HandleMesytec(TMidasEvent& event, void* ptr, int nitems, int bank, IDet *pd
 			}
 			else break;
     	}
-
-	/*// Re-sorting Yd if hits don't match with CsI
+  
+		/*// Re-sorting Yd if hits don't match with CsI
 		if(det.TCsI1Channel.size()>0&&det.TYdNo.size()>1&&calMesy.boolCsI1==true) // only check if YY1 has more than one hit and CsI has a hit and has been calibrated
 		{
  			if (int(det.TCsI1Channel.at(0)/2)-det.TYdNo.at(0)!=0 && int(det.TCsI1Channel.at(0)/2)-det.TYdNo.at(1)==0)//checking if the CsI hit is behind the first or second hit in  YY1
