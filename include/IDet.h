@@ -24,9 +24,16 @@ class IDet : public TObject {
 		Int_t TCsI1Mul;
 		std::vector<Int_t> TCsI1Channel;
 		std::vector<Double_t> TCsI1Energy;
-		std::vector<Double_t> TCsI2Energy;
 		std::vector<Double_t> TCsI1Phi;
 		std::vector<Double_t> TCsI1ADC;
+		Int_t TCsI2Mul;
+		std::vector<Int_t> TCsI2Channel;
+		std::vector<Double_t> TCsI2Energy;
+		std::vector<Double_t> TCsI2Phi;
+		std::vector<Double_t> TCsI2ADC;
+		
+		Double_t TYdCsI1ETot;
+		Double_t TYdCsI2ETot;
 
 		Int_t TSSBADC;
 		Double_t TSSBEnergy;
@@ -73,6 +80,48 @@ class IDet : public TObject {
 		std::vector<Double_t> TSd1Phi;
 		std::vector<Double_t> TSd2Phi;
 		
+		Int_t TYuMul;
+		std::vector<Int_t> TYuChannel;
+		std::vector<Double_t> TYuEnergy;
+		std::vector<Int_t> TYuADC;
+		std::vector<Int_t> TYuNo;
+		std::vector<Int_t> TYuRing;
+		std::vector<Int_t> TYuNeighbour;
+		std::vector<Double_t> TYuTheta;// Yd theta angle
+		std::vector<Double_t> TYuPhi;// Yd Phi angle
+		
+		Int_t TSurMul;
+		std::vector<Int_t> TSurChannel;
+		std::vector<Double_t> TSurEnergy;
+		std::vector<Int_t> TSurADC;
+		std::vector<Int_t> TSurNeighbour;
+		Double_t TSurEnergyCal;
+		
+		Int_t TSusMul;
+		std::vector<Int_t> TSusChannel;
+		std::vector<Double_t> TSusEnergy;
+		std::vector<Int_t> TSusADC;
+		std::vector<Int_t> TSusNeighbour;
+		std::vector<Double_t> TSuTheta;
+		std::vector<Double_t> TSuPhi;
+		
+		Int_t TZdxMul;
+		std::vector<Int_t> TZdxChannel;
+		std::vector<Double_t> TZdxPos;
+		std::vector<Double_t> TZdxEnergy;
+		std::vector<Int_t> TZdxADC;
+
+		Int_t TZdyMul;
+		std::vector<Int_t> TZdyChannel;
+		std::vector<Double_t> TZdyPos;
+		std::vector<Double_t> TZdyEnergy;
+		std::vector<Int_t> TZdyADC;
+	
+		Int_t TZdMul;
+		std::vector<Double_t> TZdR;
+		std::vector<Double_t> TZdTheta;
+		std::vector<Double_t> TZdPhi;
+	
 	void Clear();
 	ClassDef(IDet,2)
 };
