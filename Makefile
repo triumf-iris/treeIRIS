@@ -1,6 +1,6 @@
 # Makefile
 BASEDIR	      = $(shell pwd)/..
-INSTALLDIR    = $(BASEDIR)/treeIris
+INSTALLDIR    = $(BASEDIR)/treeIRIS
 INCLUDEDIR    = $(INSTALLDIR)/include
 LIBDIR        = $(INSTALLDIR)/lib
 BINARYDIR     = $(INSTALLDIR)/bin
